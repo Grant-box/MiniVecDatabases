@@ -1,8 +1,11 @@
 #include "hnswlib_index.h"
+#include "logger.h"
+
 #include <vector>
+#include <algorithm>
 
 
-HnswLibIndex::HnswLibIndex(int dim, int num_data, IndexFactory::MetricType metric, int M = 16, int ef_construction = 200) {
+HNSWLibIndex::HNSWLibIndex(int dim, int num_data, IndexFactory::MetricType metric, int M, int ef_construction) : dim(dim) {
     bool normalize = false;
     if (metric == IndexFactory::MetricType::L2) {
         space = new hnswlib::L2Space(dim);
@@ -13,23 +16,35 @@ HnswLibIndex::HnswLibIndex(int dim, int num_data, IndexFactory::MetricType metri
     index = new hnswlib::HierarchicalNSW<float>(space, num_data, M, ef_construction);
 }
 
-void HnswLibIndex::insert_vectors(const std::vector<float>& data, uint64_t label) {
+void HNSWLibIndex::insert_vectors(const std::vector<float>& data, uint64_t label) {
     index->addPoint(data.data(), label);
 }
 
-std::pair<std::vector<long>, std::vector<float>> HnswLibIndex::search_vectors(const std::vector<float>& query, int k, int ef_search = 50) {
+std::pair<std::vector<long>, std::vector<float>> HNSWLibIndex::search_vectors(const std::vector<float>& query, int k, int ef_search) {
     index->setEf(ef_search);
     // 查询结果存在result（优先队列）中
     auto result = index->searchKnn(query.data(), k);
-
+    // 查看查询结果是否小于k
+    k = std::min(k, (int)result.size());
 
     std::vector<long> indices(k);
     std::vector<float> distances(k);
+    // 调试 result
+    // GlobalLogger->debug("Result size : {}", result.size());
     for(int j = 0;j < k;j++){
-        auto item = result.top();
-        indices[j] = item.first;
-        distances[j] = item.second;
-        result.pop();
+        if(!result.empty()){
+            auto item = result.top();
+            indices[j] = item.second;
+            distances[j] = item.first;
+            result.pop();
+        }
     }
+    // 调试 id 和 distance
+    // for(size_t i = 0; i < indices.size(); ++i) {
+    //     // 如果索引有效，记录ID和距离
+    //     if(indices[i] != -1) {
+    //         GlobalLogger->debug("ID: {}, Distance: {}", indices[i], distances[i]);
+    //     }
+    // }
     return {indices, distances};
 }

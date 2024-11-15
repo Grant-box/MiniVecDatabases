@@ -1,4 +1,5 @@
 #include "index_factory.h"
+#include "hnswlib_index.h"
 #include <faiss/IndexFlat.h>
 #include <faiss/IndexIDMap.h>
 
@@ -14,7 +15,7 @@ IndexFactory* getGlobalIndexFactory() {
     return &globalIndexFactory;
 }
 
-void IndexFactory::init(IndexType type, int dim, MetricType metric) {
+void IndexFactory::init(IndexFactory::IndexType type, int dim, int num_data, IndexFactory::MetricType metric) {
     
     // 根据选择的度量类型，设置faiss的度量类型。如果选择的是L2距离，则使用METRIC_L2；否则使用METRIC_INNER_PRODUCT（内积度量）。
     faiss::MetricType faiss_metric = (metric == MetricType::L2) ? faiss::MetricType::METRIC_L2 : faiss::MetricType::METRIC_INNER_PRODUCT;
@@ -25,8 +26,13 @@ void IndexFactory::init(IndexType type, int dim, MetricType metric) {
     // 然后将其包装在IndexIDMap2中，最后将这个组合对象赋值给index_map中的相应类型。
     // 如果索引类型不是FLAT，则不执行任何操作。
     switch (type) {
-        case IndexType::FLAT:
+        case IndexFactory::IndexType::FLAT:
+            // IndexFlat 继承于 IndexFlatCode（主要作为向量的存储结构）
+            // IndexIDMap 映射id和向量，FaissIndex作为自定义类用于封装功能
             index_map[type] = new FaissIndex(new faiss::IndexIDMap(new faiss::IndexFlat(dim, faiss_metric)));
+            break;
+        case IndexFactory::IndexType::HNSW:
+            index_map[type] = new HNSWLibIndex(dim, num_data, metric, 16, 200);
             break;
         default:
             break;
@@ -35,6 +41,7 @@ void IndexFactory::init(IndexType type, int dim, MetricType metric) {
 
 // 找到对应的索引类型
 void* IndexFactory::getIndex(IndexType type) const {
+    // 找到type对应的key
     auto it = index_map.find(type);
     if(it != index_map.end()) {
         return it->second;

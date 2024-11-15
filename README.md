@@ -42,28 +42,25 @@ make -C build install
 ## 安装编译问题汇总
 ### 第三方库缺失问题
 可以通过`apt`安装的三方库，根据报错内容安装对应的三方库。
+```bash
 #### 安装openblas
-
 `sudo apt-get install libopenblas-dev`
 
 #### 安装rapidjson
-
 `sudo apt-get install rapidjson-dev`
 
 #### 安装spdlog
 `sudo apt-get install libspdlog-dev`
-#### 安装openssl
 
+#### 安装openssl
 `sudo apt-get install libssl-dev`
 
 #### 安装swig
-
 `sudo apt-get install swig`
 
 #### 安装gflags
-
 `sudo apt-get install libgflags-dev`
-
+```
 # test测试相关
 
 ## 日志模块

@@ -17,3 +17,6 @@
 #define RESPONSE_ERROR_MSG "errorMsg"
 
 #define RESPONSE_CONTENT_TYPE_JSON "application/json"
+
+#define INDEX_TYPE_FLAT "FLAT"
+#define INDEX_TYPE_HNSW "HNSW"

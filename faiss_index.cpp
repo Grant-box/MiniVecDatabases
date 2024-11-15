@@ -23,6 +23,7 @@ std::pair<std::vector<long>, std::vector<float>> FaissIndex::search_vectors(cons
     std::vector<float> distances(num_queries * k);
 
     // 执行搜索操作
+    // 返回的内容存放在传入的distances和indices中
     index->search(num_queries, query.data(), k, distances.data(), indices.data());
     // 记录检索到的值
     GlobalLogger->debug("Retrieved values:");

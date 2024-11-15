@@ -12,7 +12,7 @@ INCLUDES = -I ./hnswlib
 TARGET = vdb_server# 定义最终生成的可执行文件名为 vdb_server
 
 # 源文件
-SOURCES = vdb_server.cpp faiss_index.cpp http_server.cpp index_factory.cpp logger.cpp  # 定义所有源文件
+SOURCES = vdb_server.cpp faiss_index.cpp http_server.cpp index_factory.cpp logger.cpp hnswlib_index.cpp# 定义所有源文件
 
 # 获取当前路径
 # CURRENT_DIR := $(shell pwd)

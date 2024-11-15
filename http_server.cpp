@@ -1,6 +1,7 @@
 #include "faiss_index.h"
 #include "index_factory.h"
 #include "http_server.h"
+#include "hnswlib_index.h"
 #include "constants.h"
 #include "logger.h"
 #include <iostream>
@@ -44,8 +45,11 @@ IndexFactory::IndexType HttpServer::getIndexTypeFromRequest(const rapidjson::Doc
     // 获取请求参数中的索引类型
     if(json_request.HasMember(REQUEST_INDEX_TYPE)){
         std::string index_type_str = json_request[REQUEST_INDEX_TYPE].GetString();
-        if(index_type_str == "FLAT"){
+        if(index_type_str == INDEX_TYPE_FLAT){
             return IndexFactory::IndexType::FLAT;
+        }
+        else if(index_type_str == INDEX_TYPE_HNSW){
+            return IndexFactory::IndexType::HNSW;            
         }
     }
     return IndexFactory::IndexType::UNKNOWN;
@@ -90,8 +94,13 @@ void HttpServer::searchHandler(const httplib::Request& req, httplib::Response& r
     std::pair<std::vector<long>, std::vector<float>> result;
     switch(indexType){
         case IndexFactory::IndexType::FLAT:{
-            FaissIndex* faiss_index = static_cast<FaissIndex*>(index);
-            result = faiss_index->search_vectors(query, k);
+            FaissIndex* faissIndex = static_cast<FaissIndex*>(index);
+            result = faissIndex->search_vectors(query, k);
+            break;
+        }
+        case IndexFactory::IndexType::HNSW:{
+            HNSWLibIndex* hsnwIndex = static_cast<HNSWLibIndex*>(index);
+            result = hsnwIndex->search_vectors(query, k);
             break;
         }
         default:
@@ -100,6 +109,7 @@ void HttpServer::searchHandler(const httplib::Request& req, httplib::Response& r
     rapidjson::Document json_response;
     json_response.SetObject();
     rapidjson::Document::AllocatorType& allocator = json_response.GetAllocator();
+    
     bool values_results = false;
     rapidjson::Value vectors(rapidjson::kArrayType);
     rapidjson::Value distances(rapidjson::kArrayType);
@@ -151,8 +161,13 @@ void HttpServer::insertHandler(const httplib::Request& req, httplib::Response& r
     void* index = getGlobalIndexFactory()->getIndex(indexType);
     switch(indexType){
         case IndexFactory::IndexType::FLAT:{
-            FaissIndex* faiss_index = static_cast<FaissIndex*>(index);
-            faiss_index->insert_vectors(data, label);
+            FaissIndex* faissIndex = static_cast<FaissIndex*>(index);
+            faissIndex->insert_vectors(data, label);
+            break;
+        }
+        case IndexFactory::IndexType::HNSW:{
+            HNSWLibIndex* hnswIndex = static_cast<HNSWLibIndex*>(index);
+            hnswIndex->insert_vectors(data, label);
             break;
         }
         default:

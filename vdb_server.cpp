@@ -14,10 +14,12 @@ int main(){
 
     // 设置索引的维度
     int dim = 1;
+    int num_data = 1000;
     // 获取全局索引工厂
     IndexFactory* globalIndexFactory = getGlobalIndexFactory();
     // 初始化索引工厂
     globalIndexFactory->init(IndexFactory::IndexType::FLAT, dim);
+    globalIndexFactory->init(IndexFactory::IndexType::HNSW, dim, num_data);
     // 记录服务器初始化信息
     GlobalLogger->info("VDB Server is initialized");
     
