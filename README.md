@@ -43,26 +43,37 @@ make -C build install
 ### 第三方库缺失问题
 可以通过`apt`安装的三方库，根据报错内容安装对应的三方库。
 ```bash
-#### 安装openblas
+# 安装openblas
 `sudo apt-get install libopenblas-dev`
 
-#### 安装rapidjson
+# 安装rapidjson
 `sudo apt-get install rapidjson-dev`
 
-#### 安装spdlog
+# 安装spdlog
 `sudo apt-get install libspdlog-dev`
 
-#### 安装openssl
+# 安装openssl
 `sudo apt-get install libssl-dev`
 
-#### 安装swig
+# 安装swig
 `sudo apt-get install swig`
 
-#### 安装gflags
+# 安装gflags
 `sudo apt-get install libgflags-dev`
 ```
+
+## Makefile相关
+
+Makefile生成的中间文件存储在`build/souces`中\
+Makefile生成的目标文件存储在`build/target`中
+
 # test测试相关
 
 ## 日志模块
 日志模块测试时注意，报错fmt相关时注意链接fmt库\
 例：`g++ -o bin/test/log_test test/log_test.cpp logger.cpp -I. -lspdlog -lfmt`
+
+
+
+# 特别鸣谢
+在这个项目推进的过程中，我们要特别对罗云老师致以诚挚的感谢。罗云老师所著的《从零构建向量数据库》一书，指引着我推进该项目。
