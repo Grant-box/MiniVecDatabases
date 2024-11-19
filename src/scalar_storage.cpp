@@ -26,7 +26,7 @@ void ScalarStorage::insert_scalar(uint64_t id, const rapidjson::Document& data){
     rapidjson::StringBuffer buffer;
     // 创建一个写入器，用于将文档写入缓冲区
     rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-    // 接受数据并写入缓冲区
+    // 接受数据并写入缓冲区，将DOM转换成string
     data.Accept(writer);
     // 获取缓冲区中的字符串
     std::string value = buffer.GetString();
