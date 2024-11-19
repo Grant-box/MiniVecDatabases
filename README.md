@@ -87,16 +87,25 @@ make shared_lib && sudo make install-shared
 Makefile生成的中间文件存储在`build/souces`中\
 Makefile生成的目标文件存储在`build/target`中
 
-# test测试相关
+# examples
+
+## RapidJson例子
+
+🌟 现在已经封封装到Makefile中，可以调用`make rapidjson-exp`直接测试日志的功能
+
+## RocksDB例子
+测试文件为：`tests/rocksdb_test.cpp`\
+`g++ -std=c++17 ./test/rocksdb_test.cpp -o ./bin/test/rocksdb_test -lrocksdb -lpthread  -ldl -lrt -lsnappy -lgflags -lz -lbz2 -llz4 -lzstd`
+🌟 现在已经封封装到Makefile中，可以调用`make rocksdb-exp`直接测试日志的功能
+
+# tests测试相关
 
 ## 日志模块
 日志模块测试时注意，报错fmt相关时注意链接fmt库\
-例：`g++ -o bin/test/log_test test/log_test.cpp logger.cpp -I. -lspdlog -lfmt`
-
-## RocksDB测试
-测试文件为：`rocksdb_test.cpp`\
-`g++ -std=c++17 ./test/rocksdb_test.cpp -o ./bin/test/rocksdb_test -lrocksdb -lpthread  -ldl -lrt -lsnappy -lgflags -lz -lbz2 -llz4 -lzstd`
-
+测试文件为：`tests/log_test.cpp`\
+可以用g++直接运行
+例：`g++ -o bin/test/log_test test/log_test.cpp src/logger.cpp -I. -lspdlog -lfmt`\
+🌟 现在已经封封装到Makefile中，可以调用`make log-test`直接测试日志的功能
 
 # 特别鸣谢
 在这个项目推进的过程中，我们要特别对罗云老师致以诚挚的感谢。罗云老师所著的《从零构建向量数据库》一书，指引着我推进该项目。
