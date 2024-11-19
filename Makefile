@@ -2,10 +2,10 @@
 CXX = g++  # 使用 g++ 作为 C++ 编译器
 
 # 编译选项
-CXXFLAGS = -std=c++11 -g -Wall $(INCLUDES)  # 设置编译选项：使用 C++11 标准，开启调试信息，显示所有警告
+CXXFLAGS = -std=c++17 -g -Wall $(INCLUDES)  # 设置编译选项：使用 C++11 标准，开启调试信息，显示所有警告
 
 # 链接选项
-LDFLAGS = -lfaiss -fopenmp -lopenblas -lpthread -lspdlog -lfmt  # 链接所需的库：faiss、OpenMP、OpenBLAS、pthread 和 spdlog
+LDFLAGS = -lfaiss -lrocksdb -fopenmp -lopenblas -lpthread -lspdlog -lfmt -ldl -lrt -lsnappy -lgflags -lz -lbz2 -llz4 -lzstd# 链接所需的库：faiss、OpenMP、OpenBLAS、pthread 和 spdlog
 
 INCLUDES = -Ihnswlib -Iinclude
 # 目标文件

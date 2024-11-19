@@ -9,12 +9,19 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/stringbuffer.h>
 
-HttpServer::HttpServer(const std::string& host, int port) : host(host), port(port) {
+HttpServer::HttpServer(const std::string& host, int port, VectorDatabase* vector_database)
+    : host(host), port(port), vector_database_(vector_database) {
     server.Post("/search", [this](const httplib::Request& req, httplib::Response& res){
         searchHandler(req, res);
     });
     server.Post("/insert", [this](const httplib::Request& req, httplib::Response& res){
         insertHandler(req, res);
+    });
+    server.Post("/upsert", [this](const httplib::Request& req, httplib::Response& res){
+        upsertHandler(req, res);
+    });
+    server.Post("/query", [this](const httplib::Request& req, httplib::Response& res){
+        queryHandler(req, res);
     });
 }
 
@@ -32,6 +39,10 @@ bool HttpServer::isRequestValid(const rapidjson::Document& json_request, CheckTy
                    (!json_request.HasMember(REQUEST_INDEX_TYPE) || json_request[REQUEST_INDEX_TYPE].IsString());
         case CheckType::INSERT:
             // 检查请求中是否包含向量，ID是否为数组，且索引类型是否为字符串（可选）
+            return json_request.HasMember(REQUEST_VECTORS) &&
+                   json_request.HasMember(REQUEST_ID) &&
+                   (!json_request.HasMember(REQUEST_INDEX_TYPE) || json_request[REQUEST_INDEX_TYPE].IsString());
+        case CheckType::UPSERT:
             return json_request.HasMember(REQUEST_VECTORS) &&
                    json_request.HasMember(REQUEST_ID) &&
                    (!json_request.HasMember(REQUEST_INDEX_TYPE) || json_request[REQUEST_INDEX_TYPE].IsString());
@@ -176,6 +187,72 @@ void HttpServer::insertHandler(const httplib::Request& req, httplib::Response& r
     rapidjson::Document json_response;
     json_response.SetObject();
     rapidjson::Document::AllocatorType& allocator = json_response.GetAllocator();
+    json_response.AddMember(RESPONSE_RETCODE, RESPONSE_RETCODE_SUCCESS, allocator);
+    setJsonResponse(json_response, res);
+}
+
+void HttpServer::upsertHandler(const httplib::Request& req, httplib::Response& res){
+    GlobalLogger->debug("Received upsert received");
+    // 解析Json请求
+    rapidjson::Document json_request;
+    json_request.Parse(req.body.c_str());
+
+    // GlobalLogger->info("Insert request parameters: {}", req.body);
+    if(!json_request.IsObject()){
+        GlobalLogger->error("Invalid JSON request");
+        res.status = 400;
+        setErrorJsonResponse(res, RESPONSE_RETCODE_ERROR, "Invalid JSON request");
+        return;
+    }
+    if(!isRequestValid(json_request, CheckType::UPSERT)){
+        GlobalLogger->error("Missing vectors or id parameter in the request");
+        res.status = 400;
+        setErrorJsonResponse(res, RESPONSE_RETCODE_ERROR, "Missing vectors or id parameter in the request");
+        return;
+    }
+
+    uint64_t label = json_request[REQUEST_ID].GetUint64();
+
+    IndexFactory::IndexType indexType = getIndexTypeFromRequest(json_request);
+
+    vector_database_->upsert(label, json_request, indexType);
+
+    rapidjson::Document json_response;
+    json_response.SetObject();
+    rapidjson::Document::AllocatorType& allocator = json_response.GetAllocator();
+
+    json_response.AddMember(RESPONSE_RETCODE, RESPONSE_RETCODE_SUCCESS, allocator);
+    setJsonResponse(json_response, res);
+
+}
+
+void HttpServer::queryHandler(const httplib::Request& req, httplib::Response& res){
+    GlobalLogger->debug("Received query received");
+    // 解析Json请求
+    rapidjson::Document json_request;
+    json_request.Parse(req.body.c_str());
+
+    // GlobalLogger->info("Insert request parameters: {}", req.body);
+    if(!json_request.IsObject()){
+        GlobalLogger->error("Invalid JSON request");
+        res.status = 400;
+        setErrorJsonResponse(res, RESPONSE_RETCODE_ERROR, "Invalid JSON request");
+        return;
+    }
+
+    uint64_t id = json_request[REQUEST_ID].GetUint64();
+    rapidjson::Document json_data =  vector_database_->query(id);
+
+    rapidjson::Document json_response;
+    json_response.SetObject();
+    rapidjson::Document::AllocatorType& allocator = json_response.GetAllocator();
+
+    if(!json_request.IsNull()){
+        for(auto it = json_data.MemberBegin();it != json_data.MemberEnd();it++){
+            json_response.AddMember(it->name, it->value, allocator);
+        }
+    }
+    
     json_response.AddMember(RESPONSE_RETCODE, RESPONSE_RETCODE_SUCCESS, allocator);
     setJsonResponse(json_response, res);
 }

@@ -1,6 +1,7 @@
 #include "faiss_index.h"
 #include "logger.h"
 #include "constants.h"
+#include <faiss/IndexIDMap.h>
 #include <iostream>
 #include <vector>
 
@@ -10,6 +11,17 @@ void FaissIndex::insert_vectors(const std::vector<float>& data, uint64_t label) 
     long id = static_cast<long>(label);
     // 从前到后三个变量分别为向量个数，向量，标签
     index->add_with_ids(1, data.data(), &id);
+}
+
+void FaissIndex::remove_vectors(const std::vector<long>& ids){
+    faiss::IndexIDMap* id_map = dynamic_cast<faiss::IndexIDMap*>(index);
+    if(id_map){
+        faiss::IDSelectorBatch selector(ids.size(), ids.data());
+        id_map->remove_ids(selector);
+    }
+    else{
+        throw std::runtime_error("Underlying Faiss index is not an IndexIDMap");
+    }
 }
 
 // 定义搜索向量的函数，返回索引和距离的配对

@@ -13,3 +13,9 @@ curl -X POST -H "Content-Type: application/json" -d '{"vectors": [0.2], "id": 3,
 # 查询类型为HNSW的向量数据
 curl -X POST -H "Content-Type: application/json" -d '{"vectors": [0.5], "k": 2, "indexType": "HNSW"}' http://localhost:8080/search
 # 目标返回： {"vectors":[3],"distances":[0.09<....>],"retCode":0}
+
+# 0.0.3版本测试
+curl -X POST -H "Content-Type: application/json" -d '{"vectors": [0.555555], "id": 3, "indexType": "FLAT","Name": "hello", "Ci":1111}' http://localhost:8080/upsert
+
+
+curl -X POST -H "Content-Type: application/json" -d '{"id": 3}' http://localhost:8080/query

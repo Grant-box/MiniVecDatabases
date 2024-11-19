@@ -1,7 +1,7 @@
 # 项目笔记
 笔记用于学习使用
 ## 依赖库安装
-### 安装faiss
+### 安装faiss (version 1.9.0)
 安装faiss需要安装cmake
 #### cmake编译安装
 直接用`apt`安装版本不满足faiss条件\
@@ -21,7 +21,7 @@ sudo make install
 安装成功调用`cmake --version`查看你cmake版本信息
 
 查看cmake路径 `which cmake`
-#### 编译faiss库(1.9.0)
+#### 编译faiss库
 克隆faiss库
 ```bash
 git clone https://github.com/facebookresearch/faiss.git
@@ -39,6 +39,26 @@ make -C build install
 
 # 注意上述命令，非root用户需要加sudo
 ```
+
+### 安装RocksDB (version 9.7.4)
+克隆RocksDB库`git clone https://github.com/facebook/rocksdb.git`\
+如果太大或者不能翻墙可以直接下载zip压缩包用unzip解压\
+`unzip <rocksdb.zip>`\
+没安装unzip可以用该命令安装：`sudo apt-get install zip`\
+
+安装必要的库文件\
+`sudo apt-get install libsnappy-dev zlib1g-dev libbz2-dev liblz4-dev libzstd-dev libgflags-dev`\
+(前面安装了gflag的上述命令中的libgflags-dev可以删除)
+```shell
+cd rocksdb
+# 安装静态库
+make static_lib && sudo make install-static
+ # 安装动态库
+make shared_lib && sudo make install-shared
+
+# 注意：动态库和静态库选择一个安装即可
+```
+
 ## 安装编译问题汇总
 ### 第三方库缺失问题
 可以通过`apt`安装的三方库，根据报错内容安装对应的三方库。
@@ -73,6 +93,9 @@ Makefile生成的目标文件存储在`build/target`中
 日志模块测试时注意，报错fmt相关时注意链接fmt库\
 例：`g++ -o bin/test/log_test test/log_test.cpp logger.cpp -I. -lspdlog -lfmt`
 
+## RocksDB测试
+测试文件为：`rocksdb_test.cpp`\
+`g++ -std=c++17 ./test/rocksdb_test.cpp -o ./bin/test/rocksdb_test -lrocksdb -lpthread  -ldl -lrt -lsnappy -lgflags -lz -lbz2 -llz4 -lzstd`
 
 
 # 特别鸣谢

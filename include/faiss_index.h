@@ -9,9 +9,9 @@ public:
     FaissIndex(faiss::Index* index);
     // 将一个向量插入到索引中，并指定标签
     void insert_vectors(const std::vector<float>& data, uint64_t label);
+    void remove_vectors(const std::vector<long>& ids);
     // 搜索与给定向量最相似的向量，并返回id和距离
     std::pair<std::vector<long>, std::vector<float>> search_vectors(const std::vector<float>& query, int k);
-
 private:
     faiss::Index* index;
 };

@@ -25,19 +25,18 @@ std::pair<std::vector<long>, std::vector<float>> HNSWLibIndex::search_vectors(co
     // 查询结果存在result（优先队列）中
     auto result = index->searchKnn(query.data(), k);
     // 查看查询结果是否小于k
-    k = std::min(k, (int)result.size());
+    // k = std::min(k, (int)result.size());
 
-    std::vector<long> indices(k);
-    std::vector<float> distances(k);
+    std::vector<long> indices;
+    std::vector<float> distances;
     // 调试 result
     // GlobalLogger->debug("Result size : {}", result.size());
-    for(int j = 0;j < k;j++){
-        if(!result.empty()){
-            auto item = result.top();
-            indices[j] = item.second;
-            distances[j] = item.first;
-            result.pop();
-        }
+
+    while(!result.empty()){
+        auto item = result.top();
+        indices.push_back(item.second);
+        distances.push_back(item.first);
+        result.pop();
     }
     // 调试 id 和 distance
     // for(size_t i = 0; i < indices.size(); ++i) {

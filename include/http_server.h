@@ -3,6 +3,7 @@
 #include "faiss_index.h"
 #include "index_factory.h"
 #include "httplib.h"
+#include "vector_database.h"
 #include <rapidjson/document.h>
 #include <string>
 
@@ -10,10 +11,11 @@ class HttpServer {
 public:
     enum class CheckType {
         SEARCH,
-        INSERT
+        INSERT,
+        UPSERT
     };
     
-    HttpServer(const std::string& host, int port);
+    HttpServer(const std::string& host, int port, VectorDatabase* vector_database);
 
     void start();
 private:
@@ -22,6 +24,8 @@ private:
     void searchHandler(const httplib::Request& req, httplib::Response& res);
     // 处理插入请求的处理函数
     void insertHandler(const httplib::Request& req, httplib::Response& res);
+    void upsertHandler(const httplib::Request& req, httplib::Response& res);
+    void queryHandler(const httplib::Request& req, httplib::Response& res);
     // 设置JSON格式的响应
     void setJsonResponse(const rapidjson::Document& json_response, httplib::Response& res);
     // 设置错误信息的JSON响应
@@ -34,4 +38,5 @@ private:
     httplib::Server server;
     std::string host;
     int port;
+    VectorDatabase* vector_database_;
 };

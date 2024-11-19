@@ -1,5 +1,6 @@
 #include "http_server.h"
 #include "logger.h"
+#include "vector_database.h"
 #include "index_factory.h"
 
 int main(){
@@ -21,10 +22,13 @@ int main(){
     globalIndexFactory->init(IndexFactory::IndexType::FLAT, dim);
     globalIndexFactory->init(IndexFactory::IndexType::HNSW, dim, num_data);
     // 记录服务器初始化信息
-    GlobalLogger->info("VDB Server is initialized");
     
+    GlobalLogger->info("VDB Server is initialized");
+    std::string db_path = "./ScalarStorage";
+    VectorDatabase vector_database(db_path);
+    GlobalLogger->info("VectorDatabase initialized");
     // 创建HTTP服务器实例
-    HttpServer http_server("localhost", 8080);
+    HttpServer http_server("localhost", 8080, &vector_database);
     // 记录服务器运行信息
     GlobalLogger->info("VDB Server is running");
     // 启动HTTP服务器
