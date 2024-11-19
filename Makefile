@@ -1,8 +1,8 @@
 # 编译器
-CXX = g++  # 使用 g++ 作为 C++ 编译器
+CXX = g++# 使用 g++ 作为 C++ 编译器
 
 # 编译选项
-CXXFLAGS = -std=c++17 -g -Wall $(INCLUDES)  # 设置编译选项：使用 C++11 标准，开启调试信息，显示所有警告
+CXXFLAGS = -std=c++17 -g -Wall $(INCLUDES)# 设置编译选项：使用 C++11 标准，开启调试信息，显示所有警告
 
 # 链接选项
 LDFLAGS = -lfaiss -lrocksdb -fopenmp -lopenblas -lpthread -lspdlog -lfmt -ldl -lrt -lsnappy -lgflags -lz -lbz2 -llz4 -lzstd# 链接所需的库：faiss、OpenMP、OpenBLAS、pthread 和 spdlog
@@ -59,3 +59,35 @@ clean:  # 定义清理目标
 # rm -rf $(BUILD_DIR) $(TARGET)  # 删除所有对象文件和可执行文件
 # rm -f $(BUILD_DIR)/*.o $(TARGET)  # 删除所有对象文件和可执行文件
 # rm -rf $(BUILD_DIR)  # 删除 build 文件夹
+
+
+# examples部分
+# examples部分主要是对用到的库的某些功能写一些例子
+EXAMPLES_DIR = examples/
+EXAMPLES_BIN_DIR = bin/examples/
+
+$(EXAMPLES_DIR):
+	mkdir -p $(EXAMPLES_DIR)
+
+$(EXAMPLES_BIN_DIR):
+	mkdir -p $(EXAMPLES_BIN_DIR)
+
+rapidjson-exp: | $(EXAMPLES_DIR) $(EXAMPLES_BIN_DIR)
+	$(CXX) $(EXAMPLES_DIR)rapidjson_exp.cpp -o $(EXAMPLES_BIN_DIR)rapidjson_exp $(CXXFLAGS) $(LDFLAGS)
+
+rocksdb-exp: | $(EXAMPLES_DIR) $(EXAMPLES_BIN_DIR)
+	$(CXX) $(EXAMPLES_DIR)rocksdb_exp.cpp -o $(EXAMPLES_BIN_DIR)rocksdb_exp $(CXXFLAGS) $(LDFLAGS)
+
+# tests部分
+# tests部分主要是对vdb内部模块进行测试
+TESTS_DIR = tests/
+TESTS_BIN_DIR = bin/tests/
+
+$(TESTS_DIR):
+	mkdir -p $(TESTS_DIR)
+
+$(TESTS_BIN_DIR):
+	mkdir -p $(TESTS_BIN_DIR)
+
+log-test: | $(TESTS_DIR) $(TESTS_BIN_DIR)
+	$(CXX) $(CXXFLAGS) $(TESTS_DIR)log_test.cpp $(SOURCES_DIR)logger.cpp -o $(TESTS_BIN_DIR)log_test $(LDFLAGS)
